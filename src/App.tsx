@@ -9,6 +9,7 @@ interface Dog {
 	age: number;
 	zip_code: string;
 	breed: string;
+	city?: string;
 }
 
 function App() {
@@ -37,7 +38,8 @@ function App() {
 
 	const getIds = async () => {
 		await fetch(
-			`https://frontend-take-home-service.fetch.com/dogs/search?from=${index}`,
+			// get the amount of cards to 12
+			`https://frontend-take-home-service.fetch.com/dogs/search?from=${index}&size=${9}`,
 			{
 				method: "GET",
 				credentials: "include",
@@ -46,8 +48,9 @@ function App() {
 				},
 			}
 		).then(async (res) => {
+			console.log("ids", res);
+
 			if (res.status === 200) {
-				console.log(res);
 				setLoggedIn(true);
 				const data = await res.json();
 				setIds(data.resultIds);
@@ -72,7 +75,24 @@ function App() {
 			}
 		});
 	};
-	console.log(index);
+
+	const getCity = async (zip: string) => {
+		const data = await fetch(
+			`https://api.zip-codes.com/ZipCodesAPI.svc/1.0/GetZipCodeDetails/${zip}?key=`,
+			{
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+				},
+			}
+		).then(async (res) => {
+			const data = await res.json();
+			return data;
+		});
+
+		return data.city;
+	};
+
 	useEffect(() => {
 		getIds();
 	}, [loggedIn, index]);
@@ -80,6 +100,23 @@ function App() {
 	useEffect(() => {
 		if (ids.length) {
 			getDogs(ids);
+		}
+	}, [ids]);
+
+	const appendCities = async (dogs: Dog[]) => {
+		let data = dogs;
+		data.map(async (dog) => {
+			const res = await getCity(dog.zip_code);
+			const res1 = await res.json();
+			dog.city = res1.city;
+			console.log(res1);
+		});
+		setDogs(data);
+	};
+
+	useEffect(() => {
+		if (ids.length) {
+			appendCities(dogs);
 		}
 	}, [ids]);
 
@@ -118,10 +155,31 @@ function App() {
 	}
 
 	return (
-		<div className="w-full bg-red-100">
-			<div className="flex flex-col">
+		<div className="w-full">
+			<div className="grid grid-cols-3 my-10 justify-start flex-wrap gap-4">
 				{dogs.map((dog) => (
-					<span key={dog.id}>{dog.name}</span>
+					<div
+						key={dog.id}
+						className="w-full justify-start h-[150px] flex flex-row items-center gap-4 border-2 border-gray-200 rounded-md"
+					>
+						<div className="w-[200px] flex justify-center relative object-cover h-[150px]">
+							<img src={dog.img} className="h-full w-full object-cover" />
+						</div>
+						<div className="flex flex-col justify-start text-left gap-2">
+							<span className="font-semibold text-lg">
+								{dog.name}
+								{dog.age > 0 ? (
+									`, ${dog.age}`
+								) : (
+									<span className="bg-green-100 p-1 rounded border-1 border-green-300 text-green-700 rounded md uppercase text-xs mx-2">
+										puppy
+									</span>
+								)}
+							</span>
+							<span className="text-gray-600">{dog.breed}</span>
+							<span className="text-gray-600">{dog.city}</span>
+						</div>
+					</div>
 				))}
 			</div>
 
