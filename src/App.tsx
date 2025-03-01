@@ -15,10 +15,8 @@ function App() {
 			credentials: "include",
 			body: JSON.stringify(body),
 		}).then((res) => {
-			console.log("Response from login:", res);
-			if (res.ok) {
-				// Check for cookies in the response
-				console.log("Cookies set:", document.cookie);
+			if (res.status === 200) {
+				setLoggedIn(true);
 			} else {
 				console.error("Authentication failed:", res.status);
 			}
@@ -33,8 +31,9 @@ function App() {
 				"Content-Type": "application/json",
 			},
 		}).then(async (res) => {
-			// setDogs(res.data);
+			console.log(res.status);
 			if (res.status === 200) {
+				console.log("200");
 				setLoggedIn(true);
 				setDogs(await res.json());
 			}
@@ -45,7 +44,7 @@ function App() {
 
 	useEffect(() => {
 		data();
-	}, []);
+	}, [loggedIn]);
 
 	if (!loggedIn) {
 		return (
