@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "./App.css";
+import "./index.css"; // Import Tailwind CSS
 
 interface Dog {
 	id: string;
@@ -14,6 +15,7 @@ function App() {
 	const [loggedIn, setLoggedIn] = useState(false);
 	const [ids, setIds] = useState<[]>([]);
 	const [dogs, setDogs] = useState<Dog[]>([]);
+	const [index, setIndex] = useState<number>(0);
 
 	const auth = async (formData: FormData) => {
 		const body = { name: formData.get("name"), email: formData.get("email") };
@@ -34,14 +36,18 @@ function App() {
 	};
 
 	const getIds = async () => {
-		await fetch("https://frontend-take-home-service.fetch.com/dogs/search", {
-			method: "GET",
-			credentials: "include",
-			headers: {
-				"Content-Type": "application/json",
-			},
-		}).then(async (res) => {
+		await fetch(
+			`https://frontend-take-home-service.fetch.com/dogs/search?from=${index}`,
+			{
+				method: "GET",
+				credentials: "include",
+				headers: {
+					"Content-Type": "application/json",
+				},
+			}
+		).then(async (res) => {
 			if (res.status === 200) {
+				console.log(res);
 				setLoggedIn(true);
 				const data = await res.json();
 				setIds(data.resultIds);
@@ -51,7 +57,7 @@ function App() {
 	};
 
 	const getDogs = async (ids: []) => {
-		await fetch("https://frontend-take-home-service.fetch.com/dogs/", {
+		await fetch("https://frontend-take-home-service.fetch.com/dogs", {
 			method: "POST",
 			credentials: "include",
 			body: JSON.stringify(ids),
@@ -59,7 +65,6 @@ function App() {
 				"Content-Type": "application/json",
 			},
 		}).then(async (res) => {
-			console.log(res);
 			if (res.status === 200) {
 				setLoggedIn(true);
 				const data = await res.json();
@@ -67,10 +72,10 @@ function App() {
 			}
 		});
 	};
-
+	console.log(index);
 	useEffect(() => {
 		getIds();
-	}, [loggedIn]);
+	}, [loggedIn, index]);
 
 	useEffect(() => {
 		if (ids.length) {
@@ -113,12 +118,30 @@ function App() {
 	}
 
 	return (
-		<div>
-			<ul>
-				{dogs.map((dog) => {
-					return <li>{dog.name}</li>;
-				})}
-			</ul>
+		<div className="w-full bg-red-100">
+			<div className="flex flex-col">
+				{dogs.map((dog) => (
+					<span key={dog.id}>{dog.name}</span>
+				))}
+			</div>
+
+			<div className="w-full flex flex-row justify-center items-center gap-10">
+				<button
+					disabled={index <= 0}
+					onClick={() => {
+						setIndex(index - 25);
+					}}
+				>
+					Prev
+				</button>
+				<button
+					onClick={() => {
+						setIndex(index + 25);
+					}}
+				>
+					Next
+				</button>
+			</div>
 		</div>
 	);
 }
