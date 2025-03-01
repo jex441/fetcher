@@ -125,18 +125,21 @@ function App() {
 				{dogs.map((dog) => (
 					<div
 						key={dog.id}
-						className="w-full justify-start h-[150px] flex flex-row items-center gap-4 border-2 border-gray-200 rounded-md"
+						className="w-full justify-start items-start h-[150px] flex flex-row gap-4 border-2 border-gray-200 rounded-md"
 					>
-						<div className="w-[200px] flex justify-center relative object-cover h-[150px]">
-							<img src={dog.img} className="h-full w-full object-cover" />
+						<div className="w-[200px] flex justify-center relative object-cover h-full">
+							<img
+								src={dog.img}
+								className="h-full w-full object-cover rounded-md"
+							/>
 						</div>
-						<div className="flex flex-col justify-start text-left gap-2">
-							<span className="font-semibold text-lg">
+						<div className="flex m-1 flex-col text-left gap-2">
+							<span className="font-semibold text-xl flex items-center">
 								{dog.name}
 								{dog.age > 0 ? (
 									`, ${dog.age}`
 								) : (
-									<span className="bg-green-100 p-1 rounded border-1 border-green-300 text-green-700 rounded md uppercase text-xs mx-2">
+									<span className="bg-green-100 p-[1px] rounded border-1 border-green-300 text-green-700 rounded md uppercase text-[10px] mx-2">
 										puppy
 									</span>
 								)}
