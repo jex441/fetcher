@@ -1,9 +1,19 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 
+interface Dog {
+	id: string;
+	img: string;
+	name: string;
+	age: number;
+	zip_code: string;
+	breed: string;
+}
+
 function App() {
 	const [loggedIn, setLoggedIn] = useState(false);
-	const [dogs, setDogs] = useState([]);
+	const [ids, setIds] = useState<[]>([]);
+	const [dogs, setDogs] = useState<Dog[]>([]);
 
 	const auth = async (formData: FormData) => {
 		const body = { name: formData.get("name"), email: formData.get("email") };
@@ -23,28 +33,50 @@ function App() {
 		});
 	};
 
-	const data = async () => {
-		fetch("https://frontend-take-home-service.fetch.com/dogs/breeds", {
+	const getIds = async () => {
+		await fetch("https://frontend-take-home-service.fetch.com/dogs/search", {
 			method: "GET",
 			credentials: "include",
 			headers: {
 				"Content-Type": "application/json",
 			},
 		}).then(async (res) => {
-			console.log(res.status);
 			if (res.status === 200) {
-				console.log("200");
 				setLoggedIn(true);
-				setDogs(await res.json());
+				const data = await res.json();
+				setIds(data.resultIds);
 			}
-			console.log("dogs", await res.json());
 			return res;
 		});
 	};
 
+	const getDogs = async (ids: []) => {
+		await fetch("https://frontend-take-home-service.fetch.com/dogs/", {
+			method: "POST",
+			credentials: "include",
+			body: JSON.stringify(ids),
+			headers: {
+				"Content-Type": "application/json",
+			},
+		}).then(async (res) => {
+			console.log(res);
+			if (res.status === 200) {
+				setLoggedIn(true);
+				const data = await res.json();
+				setDogs(data);
+			}
+		});
+	};
+
 	useEffect(() => {
-		data();
+		getIds();
 	}, [loggedIn]);
+
+	useEffect(() => {
+		if (ids.length) {
+			getDogs(ids);
+		}
+	}, [ids]);
 
 	if (!loggedIn) {
 		return (
@@ -83,8 +115,8 @@ function App() {
 	return (
 		<div>
 			<ul>
-				{dogs.map((breed) => {
-					return <li>{breed}</li>;
+				{dogs.map((dog) => {
+					return <li>{dog.name}</li>;
 				})}
 			</ul>
 		</div>
