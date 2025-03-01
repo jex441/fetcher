@@ -38,7 +38,6 @@ function App() {
 
 	const getIds = async () => {
 		await fetch(
-			// get the amount of cards to 12
 			`https://frontend-take-home-service.fetch.com/dogs/search?from=${index}&size=${9}`,
 			{
 				method: "GET",
@@ -76,23 +75,6 @@ function App() {
 		});
 	};
 
-	const getCity = async (zip: string) => {
-		const data = await fetch(
-			`https://api.zip-codes.com/ZipCodesAPI.svc/1.0/GetZipCodeDetails/${zip}?key=`,
-			{
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-				},
-			}
-		).then(async (res) => {
-			const data = await res.json();
-			return data;
-		});
-
-		return data.city;
-	};
-
 	useEffect(() => {
 		getIds();
 	}, [loggedIn, index]);
@@ -100,23 +82,6 @@ function App() {
 	useEffect(() => {
 		if (ids.length) {
 			getDogs(ids);
-		}
-	}, [ids]);
-
-	const appendCities = async (dogs: Dog[]) => {
-		let data = dogs;
-		data.map(async (dog) => {
-			const res = await getCity(dog.zip_code);
-			const res1 = await res.json();
-			dog.city = res1.city;
-			console.log(res1);
-		});
-		setDogs(data);
-	};
-
-	useEffect(() => {
-		if (ids.length) {
-			appendCities(dogs);
 		}
 	}, [ids]);
 
