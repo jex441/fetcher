@@ -17,6 +17,15 @@ interface Match {
 	match: string;
 }
 
+interface Location {
+	zip_code: string;
+	latitude: number;
+	longitude: number;
+	city: string;
+	state: string;
+	county: string;
+}
+
 function App() {
 	const [loggedIn, setLoggedIn] = useState(false);
 	const [ids, setIds] = useState<[]>([]);
@@ -153,6 +162,43 @@ function App() {
 		});
 	};
 
+	let [locationData, setLocationData] = useState<Location[]>([]);
+	let [locationHashMap, setLocationHashMap] = useState<{
+		[key: string]: string;
+	}>({});
+
+	const appendCities = async () => {
+		let zipCodes = dogs.map((dog) => dog.zip_code);
+		let data = await fetch(
+			"https://frontend-take-home-service.fetch.com/locations",
+			{
+				method: "POST",
+				credentials: "include",
+				body: JSON.stringify(zipCodes),
+				headers: {
+					"Content-Type": "application/json",
+				},
+			}
+		).then(async (res) => {
+			if (res.status === 200) {
+				const data = await res.json();
+				setLocationData(data);
+				return data;
+			}
+		});
+	};
+
+	useEffect(() => {
+		let table: { [key: string]: string } = {};
+		locationData.forEach((location: Location) => {
+			let zip = location.zip_code;
+			table[zip] = location.city + ", " + location.state;
+		});
+		setLocationHashMap(table);
+	}, [locationData]);
+
+	console.log("locationHashMap", locationHashMap);
+
 	useEffect(() => {
 		getIds(breed, ageMin, ageMax, zipCodes);
 	}, [loggedIn, index, breed, ageMin, ageMax, zipCodes, order]);
@@ -166,6 +212,12 @@ function App() {
 			getDogs(ids);
 		}
 	}, [ids]);
+
+	useEffect(() => {
+		if (dogs.length) {
+			appendCities();
+		}
+	}, [dogs]);
 
 	useEffect(() => {
 		setIndex(0);
@@ -326,6 +378,9 @@ function App() {
 									)}
 								</span>
 								<span className="text-gray-600">{dog.breed}</span>
+								<span className="text-gray-600">
+									{locationHashMap[dog.zip_code]}
+								</span>
 
 								{likedIds.includes(dog.id) ? (
 									<ThumbsUp
