@@ -1,7 +1,14 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 import "./index.css";
-import { ThumbsUp, XCircleIcon, XIcon } from "lucide-react";
+import {
+	LocateIcon,
+	MapPin,
+	PinIcon,
+	ThumbsUp,
+	XCircleIcon,
+	XIcon,
+} from "lucide-react";
 
 interface Dog {
 	id: string;
@@ -190,11 +197,12 @@ function App() {
 
 	useEffect(() => {
 		let table: { [key: string]: string } = {};
-		locationData.forEach((location: Location) => {
-			let zip = location.zip_code;
-			table[zip] = location.city + ", " + location.state;
-		});
-		setLocationHashMap(table);
+		locationData.length &&
+			locationData.forEach((location: Location) => {
+				let zip = location.zip_code;
+				table[zip] = location.city + ", " + location.state;
+			});
+		setLocationHashMap({ ...locationHashMap, ...table });
 	}, [locationData]);
 
 	console.log("locationHashMap", locationHashMap);
@@ -456,9 +464,15 @@ function App() {
 									<p className="text-2xl font-bold text-gray-800">
 										{match.breed}
 									</p>
-									<p className="text-xl font-bold text-gray-500">
-										{match.age} years old
+									<p className="leading-loose text-gray-500">
+										{match.age > 1
+											? `${match.age} years old`
+											: "less than 1 year old"}
 									</p>
+									<div className="flex flex-row items-center gap-4 text-gray-500">
+										<MapPin size={18} color="blue" />
+										{locationHashMap[match.zip_code]}
+									</div>
 								</div>
 							</div>
 						</div>
