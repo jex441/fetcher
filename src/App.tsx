@@ -23,7 +23,8 @@ function App() {
 	const [ageMin, setAgeMin] = useState<string>("");
 	const [ageMax, setAgeMax] = useState<string>("");
 	const [zipCodes, setZipCodes] = useState<string>("");
-	console.log(breed);
+	const [liked, setLiked] = useState<Dog[]>([]);
+
 	const auth = async (formData: FormData) => {
 		// const body = { name: formData.get("name"), email: formData.get("email") };
 		const body = { name: "test", email: "test@gmail.com" };
@@ -110,6 +111,22 @@ function App() {
 		});
 	};
 
+	const getMatch = async () => {
+		await fetch("https://frontend-take-home-service.fetch.com/dogs/match", {
+			method: "GET",
+			credentials: "include",
+			body: JSON.stringify(liked),
+			headers: {
+				"Content-Type": "application/json",
+			},
+		}).then(async (res) => {
+			if (res.status === 200) {
+				const data = await res.json();
+				setBreeds(data);
+			}
+		});
+	};
+
 	useEffect(() => {
 		getIds(breed, ageMin, ageMax, zipCodes);
 	}, [loggedIn, index, breed, ageMin, ageMax, zipCodes, order]);
@@ -151,7 +168,21 @@ function App() {
 		"19",
 		"20",
 	];
+	const [likedIds, setLikedIds] = useState<string[]>([]);
 
+	const likeHandler = (dog: Dog) => {
+		setLikedIds([...likedIds, dog.id]);
+		setLiked([...liked, dog]);
+	};
+
+	const unlikeHandler = (rmDog: Dog) => {
+		let newLikeIds = likedIds.filter((id) => id !== rmDog.id);
+		setLikedIds(newLikeIds);
+		let newLiked = liked.filter((dog) => dog.id !== rmDog.id);
+		setLiked(newLiked);
+	};
+
+	console.log(liked);
 	if (!loggedIn) {
 		return (
 			<>
@@ -184,111 +215,154 @@ function App() {
 				</div>
 			</>
 		);
-	}
-
-	return (
-		<div className="w-full">
-			<div className="w-full h-[80px] flex flex-row items-center justify-between">
-				<div>
-					<label htmlFor="breed" />
-					Breed:
-					<select name="breed" onChange={(e) => setBreed(e.target.value)}>
-						<option value="" selected>
-							All
-						</option>
-						{breeds.map((breed) => (
-							<option key={breed} value={breed}>
-								{breed}
+	} else
+		return (
+			<div className="w-full">
+				{/* Search bar */}
+				<div className="w-full p-2 h-[60px] bg-gray-400 flex flex-row items-center justify-between">
+					<div>
+						<label htmlFor="breed" />
+						Breed:
+						<select name="breed" onChange={(e) => setBreed(e.target.value)}>
+							<option value="" selected>
+								All
 							</option>
-						))}
-					</select>
-				</div>
-
-				<div className="">
-					<label htmlFor="ageMin" />
-					From
-					<select onChange={(e) => setAgeMin(e.target.value)}>
-						{ages.map((age) => (
-							<option key={age} value={age}>
-								{age}
-							</option>
-						))}
-					</select>
-					to
-					<select
-						onChange={(e) => setAgeMax(e.target.value)}
-						defaultValue={"20"}
-					>
-						{ages.map((age) => (
-							<option key={age} value={age}>
-								{age}
-							</option>
-						))}
-					</select>
-					years
-				</div>
-
-				<div>
-					Order results by:
-					<select onChange={(e) => setOrder(e.target.value)}>
-						<option value="breed:asc">Breed A-Z</option>
-						<option value="breed:desc">Breed Z-A</option>
-						<option value="name:asc">Name A-Z</option>
-						<option value="name:desc">Name Z-A</option>
-						<option value="age:asc">Youngest to Oldest</option>
-						<option value="age:desc">Oldest to Youngest</option>
-					</select>
-				</div>
-			</div>
-			<div className="grid grid-cols-3 my-10 h-[500px] justify-start flex-wrap gap-4">
-				{dogs.map((dog) => (
-					<div
-						key={dog.id}
-						className="w-full justify-start items-start h-[150px] flex flex-row gap-4 border-2 border-gray-200 rounded-md"
-					>
-						<div className="w-[200px] flex justify-center relative object-cover h-full">
-							<img
-								src={dog.img}
-								className="h-full w-full object-cover rounded-md"
-							/>
-						</div>
-						<div className="flex m-1 flex-col text-left gap-2">
-							<span className="font-semibold text-xl flex items-center">
-								{dog.name}
-								{dog.age > 0 ? (
-									`, ${dog.age}`
-								) : (
-									<span className="bg-green-100 p-[1px] rounded border-1 border-green-300 text-green-700 rounded md uppercase text-[10px] mx-2">
-										puppy
-									</span>
-								)}
-							</span>
-							<span className="text-gray-600">{dog.breed}</span>
-							<span className="text-gray-600">{dog.city}</span>
-						</div>
+							{breeds.map((breed) => (
+								<option key={breed} value={breed}>
+									{breed}
+								</option>
+							))}
+						</select>
 					</div>
-				))}
-			</div>
+					<div className="">
+						<label htmlFor="ageMin" />
+						From
+						<select onChange={(e) => setAgeMin(e.target.value)}>
+							{ages.map((age) => (
+								<option key={age} value={age}>
+									{age}
+								</option>
+							))}
+						</select>
+						to
+						<select
+							onChange={(e) => setAgeMax(e.target.value)}
+							defaultValue={"20"}
+						>
+							{ages.map((age) => (
+								<option key={age} value={age}>
+									{age}
+								</option>
+							))}
+						</select>
+						years
+					</div>
+					<div>
+						Order results by:
+						<select onChange={(e) => setOrder(e.target.value)}>
+							<option value="breed:asc">Breed A-Z</option>
+							<option value="breed:desc">Breed Z-A</option>
+							<option value="name:asc">Name A-Z</option>
+							<option value="name:desc">Name Z-A</option>
+							<option value="age:asc">Youngest to Oldest</option>
+							<option value="age:desc">Oldest to Youngest</option>
+						</select>
+					</div>
+				</div>
 
-			<div className="w-full flex flex-row justify-center items-center gap-10">
-				<button
-					disabled={index <= 0}
-					onClick={() => {
-						setIndex(index - 25);
-					}}
-				>
-					Prev
-				</button>
-				<button
-					onClick={() => {
-						setIndex(index + 25);
-					}}
-				>
-					Next
-				</button>
+				{/* Match Bar */}
+				<div className="h-[50px] flex flex-row justify-between">
+					<div className="flex items-center flex-row">
+						{liked.map((dog) => (
+							<img
+								onClick={() => {
+									unlikeHandler(dog);
+								}}
+								className="cursor-pointer h-6 w-6 rounded-full"
+								src={dog.img}
+							/>
+						))}
+					</div>
+					<button
+						className="bg-indigo-800 py-1 px-4 text-sm rounded-md m-2 text-white"
+						onClick={() => getMatch}
+						type="button"
+					>
+						Get Matched
+					</button>
+				</div>
+
+				{/* Results */}
+				<div className="grid p-4 grid-cols-3 my-10 h-[500px] justify-start flex-wrap gap-4">
+					{dogs.map((dog) => (
+						<div
+							key={dog.id}
+							className="w-full justify-start items-start h-[150px] flex flex-row gap-4 border-2 border-gray-200 rounded-md"
+						>
+							<div className="w-[200px] flex justify-center relative object-cover h-full">
+								<img
+									src={dog.img}
+									className="h-full w-full object-cover rounded-md"
+								/>
+							</div>
+							<div className="flex m-1 flex-col text-left gap-2">
+								<span className="font-semibold text-xl flex items-center">
+									{dog.name}
+									{dog.age > 0 ? (
+										`, ${dog.age}`
+									) : (
+										<span className="bg-green-100 p-[1px] rounded border-1 border-green-300 text-green-700 rounded md uppercase text-[10px] mx-2">
+											puppy
+										</span>
+									)}
+								</span>
+								<span className="text-gray-600">{dog.breed}</span>
+
+								{likedIds.includes(dog.id) ? (
+									<button
+										type="button"
+										className="cursor-pointer bg-indigo-800 text-white rounded-full hover:bg-indigo-900 transition-all"
+										onClick={() => {
+											unlikeHandler(dog);
+										}}
+									>
+										Unlike
+									</button>
+								) : (
+									<button
+										type="button"
+										className="cursor-pointer bg-indigo-800 text-white rounded-full hover:bg-indigo-900 transition-all"
+										onClick={() => {
+											likeHandler(dog);
+										}}
+									>
+										Like
+									</button>
+								)}
+							</div>
+						</div>
+					))}
+				</div>
+
+				<div className="w-full flex flex-row justify-center items-center gap-10">
+					<button
+						disabled={index <= 0}
+						onClick={() => {
+							setIndex(index - 25);
+						}}
+					>
+						Prev
+					</button>
+					<button
+						onClick={() => {
+							setIndex(index + 25);
+						}}
+					>
+						Next
+					</button>
+				</div>
 			</div>
-		</div>
-	);
+		);
 }
 
 export default App;
