@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 import "./index.css"; // Import Tailwind CSS
+import { ThumbsUp, XCircleIcon, XIcon } from "lucide-react";
 
 interface Dog {
 	id: string;
@@ -189,12 +190,6 @@ function App() {
 		"12",
 		"13",
 		"14",
-		"15",
-		"16",
-		"17",
-		"18",
-		"19",
-		"20",
 	];
 	const [likedIds, setLikedIds] = useState<string[]>([]);
 
@@ -282,7 +277,7 @@ function App() {
 						to
 						<select
 							onChange={(e) => setAgeMax(e.target.value)}
-							defaultValue={"20"}
+							defaultValue={"14"}
 						>
 							{ages.map((age) => (
 								<option key={age} value={age}>
@@ -355,25 +350,23 @@ function App() {
 								<span className="text-gray-600">{dog.breed}</span>
 
 								{likedIds.includes(dog.id) ? (
-									<button
-										type="button"
-										className="cursor-pointer bg-indigo-800 text-white rounded-full hover:bg-indigo-900 transition-all"
+									<ThumbsUp
+										className="bg-blue-500 cursor-pointer rounded-md p-1"
 										onClick={() => {
 											unlikeHandler(dog);
 										}}
-									>
-										Unlike
-									</button>
+										color="white"
+										size={24}
+									/>
 								) : (
-									<button
-										type="button"
-										className="cursor-pointer bg-indigo-800 text-white rounded-full hover:bg-indigo-900 transition-all"
+									<ThumbsUp
+										className="bg-transparent cursor-pointer rounded-md p-1"
 										onClick={() => {
 											likeHandler(dog);
 										}}
-									>
-										Like
-									</button>
+										color="blue"
+										size={24}
+									/>
 								)}
 							</div>
 						</div>
@@ -404,15 +397,36 @@ function App() {
 					<div
 						className={`${showModal} top-0 right-0 bottom-0 left-0 flex justify-center items-center h-screen w-screen absolute z-10 bg-black/30`}
 					>
-						<div className="h-[500px] w-[300px] rounded bg-white p-4">
+						<div className="h-[700px] w-[500px] rounded bg-white">
 							<div className="w-full flex justify-end p-2">
 								<button type="button" onClick={() => setShowModal("hidden")}>
-									x
+									<XCircleIcon size={22} color="black" />
 								</button>
 							</div>
-							<div className="flex flex-1 items-center justify-center">
-								<img src={match.img} />
-								Name<div>{match.name}</div>
+
+							<div className="w-full justify-center flex-col items-center flex">
+								<p className="text-3xl font-bold leading-loose text-indigo-800">
+									Congratulations!
+								</p>
+								<p className="text-gray-600 text-lg">Your new pup is:</p>
+							</div>
+
+							<div className="flex my-6 flex-1 flex-col gap-4 text-center items-center justify-center">
+								<img
+									className="w-[300px] h-[300px] rounded-full"
+									src={match.img}
+								/>
+								<div className="space-y-2">
+									<p className="text-3xl font-bold text-indigo-800">
+										{match.name}
+									</p>
+									<p className="text-2xl font-bold text-gray-800">
+										{match.breed}
+									</p>
+									<p className="text-xl font-bold text-gray-500">
+										{match.age} years old
+									</p>
+								</div>
 							</div>
 						</div>
 					</div>
