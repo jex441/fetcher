@@ -12,6 +12,10 @@ interface Dog {
 	city?: string;
 }
 
+interface Match {
+	match: string;
+}
+
 function App() {
 	const [loggedIn, setLoggedIn] = useState(false);
 	const [ids, setIds] = useState<[]>([]);
@@ -24,6 +28,8 @@ function App() {
 	const [ageMax, setAgeMax] = useState<string>("");
 	const [zipCodes, setZipCodes] = useState<string>("");
 	const [liked, setLiked] = useState<Dog[]>([]);
+	const [matchId, setMatchId] = useState<Match | null>(null);
+	const [match, setMatch] = useState<Dog | null>(null);
 
 	const auth = async (formData: FormData) => {
 		// const body = { name: formData.get("name"), email: formData.get("email") };
@@ -95,6 +101,23 @@ function App() {
 		});
 	};
 
+	// const getDog = async () => {
+	// 	await fetch("https://frontend-take-home-service.fetch.com/dogs", {
+	// 		method: "POST",
+	// 		credentials: "include",
+	// 		body: JSON.stringify(matchId),
+	// 		headers: {
+	// 			"Content-Type": "application/json",
+	// 		},
+	// 	}).then(async (res) => {
+	// 		if (res.status === 200) {
+	// 			const data = await res.json();
+	// 			console.log("dog:", data);
+	// 			setMatch(data);
+	// 		}
+	// 	});
+	// };
+
 	const getBreeds = async () => {
 		await fetch("https://frontend-take-home-service.fetch.com/dogs/breeds", {
 			method: "GET",
@@ -112,8 +135,9 @@ function App() {
 	};
 
 	const getMatch = async () => {
+		setShowModal("flex");
 		await fetch("https://frontend-take-home-service.fetch.com/dogs/match", {
-			method: "GET",
+			method: "POST",
 			credentials: "include",
 			body: JSON.stringify(liked),
 			headers: {
@@ -122,10 +146,14 @@ function App() {
 		}).then(async (res) => {
 			if (res.status === 200) {
 				const data = await res.json();
-				setBreeds(data);
+				setMatch(data.match);
 			}
 		});
 	};
+
+	// useEffect(() => {
+	// 	getDog();
+	// }, [matchId]);
 
 	useEffect(() => {
 		getIds(breed, ageMin, ageMax, zipCodes);
@@ -180,6 +208,13 @@ function App() {
 		setLikedIds(newLikeIds);
 		let newLiked = liked.filter((dog) => dog.id !== rmDog.id);
 		setLiked(newLiked);
+	};
+
+	const [showModal, setShowModal] = useState<string>("hidden");
+
+	const modalHandler = () => {
+		if (showModal === "hidden") setShowModal("flex");
+		if (showModal === "flex") setShowModal("hidden");
 	};
 
 	console.log(liked);
@@ -272,20 +307,21 @@ function App() {
 
 				{/* Match Bar */}
 				<div className="h-[50px] flex flex-row justify-between">
-					<div className="flex items-center flex-row">
+					<div className="flex items-center p-2 flex-row">
 						{liked.map((dog) => (
 							<img
 								onClick={() => {
 									unlikeHandler(dog);
 								}}
-								className="cursor-pointer h-6 w-6 rounded-full"
+								className="border-1 border-transparent hover:border-red-500 cursor-pointer h-6 w-6 rounded-full"
 								src={dog.img}
 							/>
 						))}
 					</div>
 					<button
-						className="bg-indigo-800 py-1 px-4 text-sm rounded-md m-2 text-white"
-						onClick={() => getMatch}
+						disabled={likedIds.length < 2}
+						className="bg-indigo-800 py-1 px-4 text-sm rounded-md m-2 text-white disabled:bg-gray-400"
+						onClick={() => getMatch()}
 						type="button"
 					>
 						Get Matched
@@ -344,6 +380,7 @@ function App() {
 					))}
 				</div>
 
+				{/* Prev/Next */}
 				<div className="w-full flex flex-row justify-center items-center gap-10">
 					<button
 						disabled={index <= 0}
@@ -361,6 +398,25 @@ function App() {
 						Next
 					</button>
 				</div>
+
+				{/* Modal */}
+				{match !== null && (
+					<div
+						className={`${showModal} top-0 right-0 bottom-0 left-0 flex justify-center items-center h-screen w-screen absolute z-10 bg-black/30`}
+					>
+						<div className="h-[500px] w-[300px] rounded bg-white p-4">
+							<div className="w-full flex justify-end p-2">
+								<button type="button" onClick={() => setShowModal("hidden")}>
+									x
+								</button>
+							</div>
+							<div className="flex flex-1 items-center justify-center">
+								<img src={match.img} />
+								Name<div>{match.name}</div>
+							</div>
+						</div>
+					</div>
+				)}
 			</div>
 		);
 }
