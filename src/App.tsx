@@ -176,17 +176,14 @@ function App() {
 
 	const appendCities = async () => {
 		let zipCodes = dogs.map((dog) => dog.zip_code);
-		let data = await fetch(
-			"https://frontend-take-home-service.fetch.com/locations",
-			{
-				method: "POST",
-				credentials: "include",
-				body: JSON.stringify(zipCodes),
-				headers: {
-					"Content-Type": "application/json",
-				},
-			}
-		).then(async (res) => {
+		await fetch("https://frontend-take-home-service.fetch.com/locations", {
+			method: "POST",
+			credentials: "include",
+			body: JSON.stringify(zipCodes),
+			headers: {
+				"Content-Type": "application/json",
+			},
+		}).then(async (res) => {
 			if (res.status === 200) {
 				const data = await res.json();
 				setLocationData(data);
@@ -196,12 +193,14 @@ function App() {
 	};
 
 	useEffect(() => {
+		if (!locationData.length) return;
 		let table: { [key: string]: string } = {};
-		locationData.length &&
-			locationData.forEach((location: Location) => {
+		locationData.forEach((location: Location) => {
+			if (location !== null) {
 				let zip = location.zip_code;
 				table[zip] = location.city + ", " + location.state;
-			});
+			}
+		});
 		setLocationHashMap({ ...locationHashMap, ...table });
 	}, [locationData]);
 
@@ -243,6 +242,11 @@ function App() {
 		setLiked(newLiked);
 	};
 
+	const orderHandler = (e: React.ChangeEvent<HTMLSelectElement>) => {
+		e.preventDefault();
+		setIndex(0);
+		setOrder(e.target.value);
+	};
 	if (!loggedIn) {
 		return (
 			<>
@@ -325,9 +329,14 @@ function App() {
 						</select>
 						years
 					</div>
-					<div>
+					<div className="">
 						Order results by:
-						<select className="mx-2" onChange={(e) => setOrder(e.target.value)}>
+						<select
+							className="mx-2"
+							onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+								orderHandler(e)
+							}
+						>
 							<option value="breed:asc">Breed A-Z</option>
 							<option value="breed:desc">Breed Z-A</option>
 							<option value="name:asc">Name A-Z</option>
