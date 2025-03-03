@@ -17,9 +17,17 @@ function App() {
 	const [ids, setIds] = useState<[]>([]);
 	const [dogs, setDogs] = useState<Dog[]>([]);
 	const [index, setIndex] = useState<number>(0);
-
+	const [breeds, setBreeds] = useState<[]>([]);
+	const [breed, setBreed] = useState<string>("");
+	const [order, setOrder] = useState<string>("asc");
+	const [ageMin, setAgeMin] = useState<string>("");
+	const [ageMax, setAgeMax] = useState<string>("");
+	const [zipCodes, setZipCodes] = useState<string>("");
+	console.log(breed);
 	const auth = async (formData: FormData) => {
-		const body = { name: formData.get("name"), email: formData.get("email") };
+		// const body = { name: formData.get("name"), email: formData.get("email") };
+		const body = { name: "test", email: "test@gmail.com" };
+
 		await fetch("https://frontend-take-home-service.fetch.com/auth/login", {
 			method: "POST",
 			headers: {
@@ -36,19 +44,30 @@ function App() {
 		});
 	};
 
-	const getIds = async () => {
-		await fetch(
-			`https://frontend-take-home-service.fetch.com/dogs/search?from=${index}&size=${9}`,
-			{
-				method: "GET",
-				credentials: "include",
-				headers: {
-					"Content-Type": "application/json",
-				},
-			}
-		).then(async (res) => {
-			console.log("ids", res);
+	const getIds = async (
+		breed: string,
+		ageMin: string,
+		ageMax: string,
+		zipCodes: string
+	) => {
+		let url = new URL(
+			"https://frontend-take-home-service.fetch.com/dogs/search?"
+		);
+		breed && url.searchParams.append("breeds", breed);
+		url.searchParams.append("from", String(index));
+		url.searchParams.append("size", "9");
+		ageMin && url.searchParams.append("ageMin", ageMin);
+		ageMax && url.searchParams.append("ageMax", ageMin);
+		zipCodes && url.searchParams.append("zipCodes", zipCodes);
+		url.searchParams.append("sort", `breed:${order}`);
 
+		await fetch(url, {
+			method: "GET",
+			credentials: "include",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		}).then(async (res) => {
 			if (res.status === 200) {
 				setLoggedIn(true);
 				const data = await res.json();
@@ -75,9 +94,29 @@ function App() {
 		});
 	};
 
+	const getBreeds = async () => {
+		await fetch("https://frontend-take-home-service.fetch.com/dogs/breeds", {
+			method: "GET",
+			credentials: "include",
+			// body: breed,
+			headers: {
+				"Content-Type": "application/json",
+			},
+		}).then(async (res) => {
+			if (res.status === 200) {
+				const data = await res.json();
+				setBreeds(data);
+			}
+		});
+	};
+
 	useEffect(() => {
-		getIds();
-	}, [loggedIn, index]);
+		getIds(breed, ageMin, ageMax, zipCodes);
+	}, [loggedIn, index, breed, ageMin, ageMax, zipCodes, order]);
+
+	useEffect(() => {
+		getBreeds();
+	}, [loggedIn]);
 
 	useEffect(() => {
 		if (ids.length) {
@@ -118,9 +157,79 @@ function App() {
 			</>
 		);
 	}
-
+	const ages = [
+		"0",
+		"1",
+		"2",
+		"3",
+		"4",
+		"5",
+		"6",
+		"7",
+		"8",
+		"9",
+		"10",
+		"11",
+		"12",
+		"13",
+		"14",
+		"15",
+		"16",
+		"17",
+		"18",
+		"19",
+		"20",
+	];
 	return (
 		<div className="w-full">
+			<div className="w-full h-[80px] flex flex-row items-center justify-start">
+				<label htmlFor="breed" />
+				Breed:
+				<select name="breed" onChange={(e) => setBreed(e.target.value)}>
+					<option value="" selected>
+						All
+					</option>
+					{breeds.map((breed) => (
+						<option key={breed} value={breed}>
+							{breed}
+						</option>
+					))}
+				</select>
+				Order: A-Z
+				<input
+					checked={order === "asc"}
+					onChange={(e) => {
+						setOrder("asc");
+					}}
+					type="radio"
+				/>
+				Z-A
+				<input
+					checked={order === "desc"}
+					onChange={(e) => {
+						setOrder("desc");
+					}}
+					type="radio"
+				/>
+				<label htmlFor="ageMin" />
+				From
+				<select onChange={(e) => setAgeMin(e.target.value)}>
+					{ages.map((age) => (
+						<option key={age} value={age}>
+							{age}
+						</option>
+					))}
+				</select>
+				to
+				<select onChange={(e) => setAgeMax(e.target.value)} defaultValue={"20"}>
+					{ages.map((age) => (
+						<option key={age} value={age}>
+							{age}
+						</option>
+					))}
+				</select>
+				years
+			</div>
 			<div className="grid grid-cols-3 my-10 justify-start flex-wrap gap-4">
 				{dogs.map((dog) => (
 					<div
