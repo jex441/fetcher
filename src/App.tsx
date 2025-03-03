@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import "./App.css";
-import "./index.css"; // Import Tailwind CSS
+import "./index.css";
 import { ThumbsUp, XCircleIcon, XIcon } from "lucide-react";
 
 interface Dog {
@@ -29,8 +29,26 @@ function App() {
 	const [ageMax, setAgeMax] = useState<string>("");
 	const [zipCodes, setZipCodes] = useState<string>("");
 	const [liked, setLiked] = useState<Dog[]>([]);
-	const [matchId, setMatchId] = useState<Match | null>(null);
 	const [match, setMatch] = useState<Dog | null>(null);
+	const [likedIds, setLikedIds] = useState<string[]>([]);
+	const [showModal, setShowModal] = useState<string>("hidden");
+	const ages = [
+		"0",
+		"1",
+		"2",
+		"3",
+		"4",
+		"5",
+		"6",
+		"7",
+		"8",
+		"9",
+		"10",
+		"11",
+		"12",
+		"13",
+		"14",
+	];
 
 	const auth = async (formData: FormData) => {
 		// const body = { name: formData.get("name"), email: formData.get("email") };
@@ -102,23 +120,6 @@ function App() {
 		});
 	};
 
-	// const getDog = async () => {
-	// 	await fetch("https://frontend-take-home-service.fetch.com/dogs", {
-	// 		method: "POST",
-	// 		credentials: "include",
-	// 		body: JSON.stringify(matchId),
-	// 		headers: {
-	// 			"Content-Type": "application/json",
-	// 		},
-	// 	}).then(async (res) => {
-	// 		if (res.status === 200) {
-	// 			const data = await res.json();
-	// 			console.log("dog:", data);
-	// 			setMatch(data);
-	// 		}
-	// 	});
-	// };
-
 	const getBreeds = async () => {
 		await fetch("https://frontend-take-home-service.fetch.com/dogs/breeds", {
 			method: "GET",
@@ -152,10 +153,6 @@ function App() {
 		});
 	};
 
-	// useEffect(() => {
-	// 	getDog();
-	// }, [matchId]);
-
 	useEffect(() => {
 		getIds(breed, ageMin, ageMax, zipCodes);
 	}, [loggedIn, index, breed, ageMin, ageMax, zipCodes, order]);
@@ -174,25 +171,6 @@ function App() {
 		setIndex(0);
 	}, [breed, ageMin, ageMax]);
 
-	const ages = [
-		"0",
-		"1",
-		"2",
-		"3",
-		"4",
-		"5",
-		"6",
-		"7",
-		"8",
-		"9",
-		"10",
-		"11",
-		"12",
-		"13",
-		"14",
-	];
-	const [likedIds, setLikedIds] = useState<string[]>([]);
-
 	const likeHandler = (dog: Dog) => {
 		setLikedIds([...likedIds, dog.id]);
 		setLiked([...liked, dog]);
@@ -205,14 +183,6 @@ function App() {
 		setLiked(newLiked);
 	};
 
-	const [showModal, setShowModal] = useState<string>("hidden");
-
-	const modalHandler = () => {
-		if (showModal === "hidden") setShowModal("flex");
-		if (showModal === "flex") setShowModal("hidden");
-	};
-
-	console.log(liked);
 	if (!loggedIn) {
 		return (
 			<>
@@ -249,11 +219,15 @@ function App() {
 		return (
 			<div className="w-full">
 				{/* Search bar */}
-				<div className="w-full p-2 h-[60px] bg-gray-400 flex flex-row items-center justify-between">
+				<div className="w-full text-sm text-gray-900 px-6 py-2 h-[60px] border-b border-gray-300 flex flex-row items-center justify-between">
 					<div>
 						<label htmlFor="breed" />
 						Breed:
-						<select name="breed" onChange={(e) => setBreed(e.target.value)}>
+						<select
+							className="mx-2"
+							name="breed"
+							onChange={(e) => setBreed(e.target.value)}
+						>
 							<option value="" selected>
 								All
 							</option>
@@ -267,7 +241,10 @@ function App() {
 					<div className="">
 						<label htmlFor="ageMin" />
 						From
-						<select onChange={(e) => setAgeMin(e.target.value)}>
+						<select
+							className="mx-2"
+							onChange={(e) => setAgeMin(e.target.value)}
+						>
 							{ages.map((age) => (
 								<option key={age} value={age}>
 									{age}
@@ -276,6 +253,7 @@ function App() {
 						</select>
 						to
 						<select
+							className="mx-2"
 							onChange={(e) => setAgeMax(e.target.value)}
 							defaultValue={"14"}
 						>
@@ -289,7 +267,7 @@ function App() {
 					</div>
 					<div>
 						Order results by:
-						<select onChange={(e) => setOrder(e.target.value)}>
+						<select className="mx-2" onChange={(e) => setOrder(e.target.value)}>
 							<option value="breed:asc">Breed A-Z</option>
 							<option value="breed:desc">Breed Z-A</option>
 							<option value="name:asc">Name A-Z</option>
