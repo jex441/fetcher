@@ -19,7 +19,7 @@ function App() {
 	const [index, setIndex] = useState<number>(0);
 	const [breeds, setBreeds] = useState<[]>([]);
 	const [breed, setBreed] = useState<string>("");
-	const [order, setOrder] = useState<string>("asc");
+	const [order, setOrder] = useState<string>("breed:asc");
 	const [ageMin, setAgeMin] = useState<string>("");
 	const [ageMax, setAgeMax] = useState<string>("");
 	const [zipCodes, setZipCodes] = useState<string>("");
@@ -57,9 +57,9 @@ function App() {
 		url.searchParams.append("from", String(index));
 		url.searchParams.append("size", "9");
 		ageMin && url.searchParams.append("ageMin", ageMin);
-		ageMax && url.searchParams.append("ageMax", ageMin);
+		ageMax && url.searchParams.append("ageMax", ageMax);
 		zipCodes && url.searchParams.append("zipCodes", zipCodes);
-		url.searchParams.append("sort", `breed:${order}`);
+		url.searchParams.append("sort", order);
 
 		await fetch(url, {
 			method: "GET",
@@ -124,6 +124,34 @@ function App() {
 		}
 	}, [ids]);
 
+	useEffect(() => {
+		setIndex(0);
+	}, [breed, ageMin, ageMax]);
+
+	const ages = [
+		"0",
+		"1",
+		"2",
+		"3",
+		"4",
+		"5",
+		"6",
+		"7",
+		"8",
+		"9",
+		"10",
+		"11",
+		"12",
+		"13",
+		"14",
+		"15",
+		"16",
+		"17",
+		"18",
+		"19",
+		"20",
+	];
+
 	if (!loggedIn) {
 		return (
 			<>
@@ -157,80 +185,62 @@ function App() {
 			</>
 		);
 	}
-	const ages = [
-		"0",
-		"1",
-		"2",
-		"3",
-		"4",
-		"5",
-		"6",
-		"7",
-		"8",
-		"9",
-		"10",
-		"11",
-		"12",
-		"13",
-		"14",
-		"15",
-		"16",
-		"17",
-		"18",
-		"19",
-		"20",
-	];
+
 	return (
 		<div className="w-full">
-			<div className="w-full h-[80px] flex flex-row items-center justify-start">
-				<label htmlFor="breed" />
-				Breed:
-				<select name="breed" onChange={(e) => setBreed(e.target.value)}>
-					<option value="" selected>
-						All
-					</option>
-					{breeds.map((breed) => (
-						<option key={breed} value={breed}>
-							{breed}
+			<div className="w-full h-[80px] flex flex-row items-center justify-between">
+				<div>
+					<label htmlFor="breed" />
+					Breed:
+					<select name="breed" onChange={(e) => setBreed(e.target.value)}>
+						<option value="" selected>
+							All
 						</option>
-					))}
-				</select>
-				Order: A-Z
-				<input
-					checked={order === "asc"}
-					onChange={(e) => {
-						setOrder("asc");
-					}}
-					type="radio"
-				/>
-				Z-A
-				<input
-					checked={order === "desc"}
-					onChange={(e) => {
-						setOrder("desc");
-					}}
-					type="radio"
-				/>
-				<label htmlFor="ageMin" />
-				From
-				<select onChange={(e) => setAgeMin(e.target.value)}>
-					{ages.map((age) => (
-						<option key={age} value={age}>
-							{age}
-						</option>
-					))}
-				</select>
-				to
-				<select onChange={(e) => setAgeMax(e.target.value)} defaultValue={"20"}>
-					{ages.map((age) => (
-						<option key={age} value={age}>
-							{age}
-						</option>
-					))}
-				</select>
-				years
+						{breeds.map((breed) => (
+							<option key={breed} value={breed}>
+								{breed}
+							</option>
+						))}
+					</select>
+				</div>
+
+				<div className="">
+					<label htmlFor="ageMin" />
+					From
+					<select onChange={(e) => setAgeMin(e.target.value)}>
+						{ages.map((age) => (
+							<option key={age} value={age}>
+								{age}
+							</option>
+						))}
+					</select>
+					to
+					<select
+						onChange={(e) => setAgeMax(e.target.value)}
+						defaultValue={"20"}
+					>
+						{ages.map((age) => (
+							<option key={age} value={age}>
+								{age}
+							</option>
+						))}
+					</select>
+					years
+				</div>
+
+				<div>
+					Order results by:
+					<select onChange={(e) => setOrder(e.target.value)}>
+						<option value="breed:asc">Breed A-Z</option>
+						<option value="breed:desc">Breed Z-A</option>
+						<option value="name:asc">Name A-Z</option>
+						<option value="name:desc">Name Z-A</option>
+						<option value="age:asc">Youngest to Oldest</option>
+						<option value="age:desc">Oldest to Youngest</option>
+					</select>
+				</div>
 			</div>
-			<div className="grid grid-cols-3 my-10 justify-start flex-wrap gap-4">
+			<div className="grid grid-cols-3 my-10 h-[500px] justify-start flex-wrap gap-4">
 				{dogs.map((dog) => (
 					<div
 						key={dog.id}
