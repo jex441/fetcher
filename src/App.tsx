@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import "./App.css";
 import "./index.css";
 import {
+	HeartIcon,
+	HeartPulse,
 	LocateIcon,
 	MapPin,
 	PinIcon,
@@ -97,7 +99,7 @@ function App() {
 		);
 		breed && url.searchParams.append("breeds", breed);
 		url.searchParams.append("from", String(index));
-		url.searchParams.append("size", "9");
+		url.searchParams.append("size", "12");
 		ageMin && url.searchParams.append("ageMin", ageMin);
 		ageMax && url.searchParams.append("ageMax", ageMax);
 		zipCodes && url.searchParams.append("zipCodes", zipCodes);
@@ -348,14 +350,14 @@ function App() {
 				</div>
 
 				{/* Match Bar */}
-				<div className="h-[50px] flex flex-row justify-between">
+				<div className="h-[50px] z-30 bg-white sticky top-0 flex flex-row justify-between">
 					<div className="flex items-center p-2 flex-row">
 						{liked.map((dog) => (
 							<img
 								onClick={() => {
 									unlikeHandler(dog);
 								}}
-								className="border-1 border-transparent hover:border-red-500 cursor-pointer h-6 w-6 rounded-full"
+								className="border-1 border-green-400 hover:border-red-500 cursor-pointer h-8 w-8 rounded-full"
 								src={dog.img}
 							/>
 						))}
@@ -371,53 +373,65 @@ function App() {
 				</div>
 
 				{/* Results */}
-				<div className="grid p-4 grid-cols-3 my-10 h-[500px] justify-start flex-wrap gap-4">
+				<div className="grid p-4 grid-cols-4 mb-10 justify-start gap-4">
 					{dogs.map((dog) => (
 						<div
-							key={dog.id}
-							className="w-full justify-start items-start h-[150px] flex flex-row gap-4 border-2 border-gray-200 rounded-md"
+							onClick={() => {
+								likedIds.includes(dog.id)
+									? unlikeHandler(dog)
+									: likeHandler(dog);
+							}}
+							className="cursor-pointer h-[220px] w-[320px] relative bg-linear-[180deg,transparent_50%,black_99%] flex flex-col gap-4 border-2 border-gray-200 rounded-md"
 						>
-							<div className="w-[200px] flex justify-center relative object-cover h-full">
-								<img
-									src={dog.img}
-									className="h-full w-full object-cover rounded-md"
-								/>
+							<div
+								key={dog.id}
+								style={{
+									backgroundImage: `url(${dog.img})`,
+									backgroundSize: "cover",
+									backgroundRepeat: "no-repeat",
+									backgroundPosition: "center",
+								}}
+								className="absolute -z-10 inset-0"
+							></div>
+							<div className="z-20">
+								{likedIds.includes(dog.id) ? (
+									<HeartIcon
+										fill="pink"
+										className="m-2 cursor-pointer rounded-md p-1"
+										onClick={() => {
+											unlikeHandler(dog);
+										}}
+										color="pink"
+										size={28}
+									/>
+								) : (
+									<HeartIcon
+										className="m-2 cursor-pointer rounded-md p-1"
+										onClick={() => {
+											likeHandler(dog);
+										}}
+										color="pink"
+										size={28}
+									/>
+								)}
 							</div>
-							<div className="flex m-1 flex-col text-left gap-2">
-								<span className="font-semibold text-xl flex items-center">
+							<div className="px-2 flex m-1 z-20 w-full relative flex-col h-full text-white justify-end text-left gap-1">
+								<span className="font-semibold text-3xl flex items-center">
 									{dog.name}
 									{dog.age > 0 ? (
 										`, ${dog.age}`
 									) : (
-										<span className="bg-green-100 p-[1px] rounded border-1 border-green-300 text-green-700 rounded md uppercase text-[10px] mx-2">
+										<span className="bg-green-100 py-[1px] px-[4px] rounded border-1 border-green-900 text-green-900 rounded md uppercase text-[10px] mx-2">
 											puppy
 										</span>
 									)}
 								</span>
-								<span className="text-gray-600">{dog.breed}</span>
-								<span className="text-gray-600">
-									{locationHashMap[dog.zip_code]}
-								</span>
-
-								{likedIds.includes(dog.id) ? (
-									<ThumbsUp
-										className="bg-blue-500 cursor-pointer rounded-md p-1"
-										onClick={() => {
-											unlikeHandler(dog);
-										}}
-										color="white"
-										size={24}
-									/>
-								) : (
-									<ThumbsUp
-										className="bg-transparent cursor-pointer rounded-md p-1"
-										onClick={() => {
-											likeHandler(dog);
-										}}
-										color="blue"
-										size={24}
-									/>
-								)}
+								<div className="w-full flex items-center justify-between">
+									<span className="text-indigo-400 font-lg">{dog.breed}</span>
+									<span className="text-white font-lg">
+										{locationHashMap[dog.zip_code]}
+									</span>
+								</div>
 							</div>
 						</div>
 					))}
@@ -445,10 +459,10 @@ function App() {
 				{/* Modal */}
 				{match !== null && (
 					<div
-						className={`${showModal} top-0 right-0 bottom-0 left-0 flex justify-center items-center h-screen w-screen absolute z-10 bg-black/30`}
+						className={`${showModal} z-40 top-0 right-0 bottom-0 left-0 flex justify-center items-center h-screen w-screen absolute z-10 bg-black/30`}
 					>
-						<div className="h-[700px] w-[500px] rounded bg-white">
-							<div className="w-full flex justify-end p-2">
+						<div className="h-[650px] w-[500px] rounded bg-white">
+							<div className="w-full flex justify-end p-1">
 								<button type="button" onClick={() => setShowModal("hidden")}>
 									<XCircleIcon size={22} color="black" />
 								</button>
