@@ -360,7 +360,7 @@ function App() {
 					</div>
 					<button
 						disabled={likedIds.length < 2}
-						className="bg-indigo-800 py-1 px-4 text-sm rounded-md m-2 text-white disabled:bg-gray-400"
+						className="cursor-pointer hover:bg-indigo-900 transition-all bg-indigo-800 py-1 px-4 text-sm rounded-md m-2 text-white disabled:bg-gray-400"
 						onClick={() => getMatch()}
 						type="button"
 					>
@@ -485,7 +485,11 @@ function App() {
 											type="button"
 											onClick={() => setShowModal("hidden")}
 										>
-											<X size={22} color="gray" />
+											<X
+												size={22}
+												color="gray"
+												className="cursor-pointer opacity-80 hover:opacity-100"
+											/>
 										</button>
 									</div>
 
