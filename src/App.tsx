@@ -381,15 +381,18 @@ function App() {
 									? unlikeHandler(dog)
 									: likeHandler(dog);
 							}}
-							key={dog.id}
-							style={{
-								backgroundImage: `url(${dog.img})`,
-								backgroundSize: "cover",
-								backgroundRepeat: "no-repeat",
-								backgroundPosition: "center",
-							}}
-							className="cursor-pointer overflow-hidden w-[300px] justify-start items-start h-[400px] flex flex-col gap-4 border-2 border-gray-200 rounded-md"
+							className="cursor-pointer h-[220px] w-[320px] relative bg-linear-[180deg,transparent_50%,black_99%] flex flex-col gap-4 border-2 border-gray-200 rounded-md"
 						>
+							<div
+								key={dog.id}
+								style={{
+									backgroundImage: `url(${dog.img})`,
+									backgroundSize: "cover",
+									backgroundRepeat: "no-repeat",
+									backgroundPosition: "center",
+								}}
+								className="absolute -z-10 inset-0"
+							></div>
 							<div className="z-20">
 								{likedIds.includes(dog.id) ? (
 									<HeartIcon
@@ -412,14 +415,13 @@ function App() {
 									/>
 								)}
 							</div>
-							<div className="h-[400px] w-[300px] z-10 absolute bg-linear-[180deg,transparent_50%,black_99%]"></div>
 							<div className="px-2 flex m-1 z-20 w-full relative flex-col h-full text-white justify-end text-left gap-1">
 								<span className="font-semibold text-3xl flex items-center">
 									{dog.name}
 									{dog.age > 0 ? (
 										`, ${dog.age}`
 									) : (
-										<span className="bg-green-100 p-[1px] rounded border-1 border-green-300 text-green-700 rounded md uppercase text-[10px] mx-2">
+										<span className="bg-green-100 py-[1px] px-[4px] rounded border-1 border-green-900 text-green-900 rounded md uppercase text-[10px] mx-2">
 											puppy
 										</span>
 									)}
@@ -459,8 +461,8 @@ function App() {
 					<div
 						className={`${showModal} z-40 top-0 right-0 bottom-0 left-0 flex justify-center items-center h-screen w-screen absolute z-10 bg-black/30`}
 					>
-						<div className="h-[700px] w-[500px] rounded bg-white">
-							<div className="w-full flex justify-end p-2">
+						<div className="h-[650px] w-[500px] rounded bg-white">
+							<div className="w-full flex justify-end p-1">
 								<button type="button" onClick={() => setShowModal("hidden")}>
 									<XCircleIcon size={22} color="black" />
 								</button>
