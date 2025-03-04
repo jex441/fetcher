@@ -1,18 +1,17 @@
 # Fetcher
 
-Deployed at:
-url["https://fetcher-seven.vercel.app/"]
+Deployed at: https://fetcher-seven.vercel.app/
 
-To run locally:
+## To run locally:
 
-Clone this repo
+1. Clone this repo
 
-Run `pnpm install`
+2. Run `pnpm install`
 
-Create a .env file in the root of the folder
+3. Create a `.env` file in the root of the folder
 
-Paste in `VITE_BASE_URL=<the base url for this exercise>`
+4. Paste into the `.env` file: `VITE_BASE_URL=<the base url for this exercise>`
 
-Run `npm run dev`
+5. Run `npm run dev`
 
-Open in localhost:5173
+Open in `localhost:5173`
