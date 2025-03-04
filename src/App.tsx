@@ -8,6 +8,7 @@ import {
 	MapPin,
 	PinIcon,
 	ThumbsUp,
+	X,
 	XCircleIcon,
 	XIcon,
 } from "lucide-react";
@@ -50,6 +51,12 @@ function App() {
 	const [match, setMatch] = useState<Dog | null>(null);
 	const [likedIds, setLikedIds] = useState<string[]>([]);
 	const [showModal, setShowModal] = useState<string>("hidden");
+	let [locationData, setLocationData] = useState<Location[]>([]);
+	let [locationHashMap, setLocationHashMap] = useState<{
+		[key: string]: string;
+	}>({});
+	const [loadingMatch, setLoadingMatch] = useState<boolean>(false);
+	const [loadingDogs, setLoadingDogs] = useState<boolean>(false);
 	const ages = [
 		"0",
 		"1",
@@ -69,8 +76,7 @@ function App() {
 	];
 
 	const auth = async (formData: FormData) => {
-		// const body = { name: formData.get("name"), email: formData.get("email") };
-		const body = { name: "test", email: "test@gmail.com" };
+		const body = { name: formData.get("name"), email: formData.get("email") };
 
 		await fetch("https://frontend-take-home-service.fetch.com/auth/login", {
 			method: "POST",
@@ -122,6 +128,7 @@ function App() {
 	};
 
 	const getDogs = async (ids: []) => {
+		setLoadingDogs(true);
 		await fetch("https://frontend-take-home-service.fetch.com/dogs", {
 			method: "POST",
 			credentials: "include",
@@ -135,6 +142,9 @@ function App() {
 				const data = await res.json();
 				setDogs(data);
 			}
+			setTimeout(() => {
+				setLoadingDogs(false);
+			}, 1000);
 		});
 	};
 
@@ -142,7 +152,6 @@ function App() {
 		await fetch("https://frontend-take-home-service.fetch.com/dogs/breeds", {
 			method: "GET",
 			credentials: "include",
-			// body: breed,
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -156,6 +165,7 @@ function App() {
 
 	const getMatch = async () => {
 		setShowModal("flex");
+		setLoadingMatch(true);
 		await fetch("https://frontend-take-home-service.fetch.com/dogs/match", {
 			method: "POST",
 			credentials: "include",
@@ -168,13 +178,11 @@ function App() {
 				const data = await res.json();
 				setMatch(data.match);
 			}
+			setTimeout(() => {
+				setLoadingMatch(false);
+			}, 1000);
 		});
 	};
-
-	let [locationData, setLocationData] = useState<Location[]>([]);
-	let [locationHashMap, setLocationHashMap] = useState<{
-		[key: string]: string;
-	}>({});
 
 	const appendCities = async () => {
 		let zipCodes = dogs.map((dog) => dog.zip_code);
@@ -205,8 +213,6 @@ function App() {
 		});
 		setLocationHashMap({ ...locationHashMap, ...table });
 	}, [locationData]);
-
-	console.log("locationHashMap", locationHashMap);
 
 	useEffect(() => {
 		getIds(breed, ageMin, ageMax, zipCodes);
@@ -249,6 +255,10 @@ function App() {
 		setIndex(0);
 		setOrder(e.target.value);
 	};
+
+	useEffect(() => {
+		window.scrollTo(0, 0);
+	}, [index]);
 	if (!loggedIn) {
 		return (
 			<>
@@ -374,82 +384,92 @@ function App() {
 
 				{/* Results */}
 				<div className="grid p-4 grid-cols-4 mb-10 justify-start gap-4">
-					{dogs.map((dog) => (
-						<div
-							onClick={() => {
-								likedIds.includes(dog.id)
-									? unlikeHandler(dog)
-									: likeHandler(dog);
-							}}
-							className="cursor-pointer h-[220px] w-[320px] relative bg-linear-[180deg,transparent_50%,black_99%] flex flex-col gap-4 border-2 border-gray-200 rounded-md"
-						>
-							<div
-								key={dog.id}
-								style={{
-									backgroundImage: `url(${dog.img})`,
-									backgroundSize: "cover",
-									backgroundRepeat: "no-repeat",
-									backgroundPosition: "center",
-								}}
-								className="absolute -z-10 inset-0"
-							></div>
-							<div className="z-20">
-								{likedIds.includes(dog.id) ? (
-									<HeartIcon
-										fill="pink"
-										className="m-2 cursor-pointer rounded-md p-1"
-										onClick={() => {
-											unlikeHandler(dog);
-										}}
-										color="pink"
-										size={28}
-									/>
-								) : (
-									<HeartIcon
-										className="m-2 cursor-pointer rounded-md p-1"
-										onClick={() => {
-											likeHandler(dog);
-										}}
-										color="pink"
-										size={28}
-									/>
-								)}
-							</div>
-							<div className="px-2 flex m-1 z-20 w-full relative flex-col h-full text-white justify-end text-left gap-1">
-								<span className="font-semibold text-3xl flex items-center">
-									{dog.name}
-									{dog.age > 0 ? (
-										`, ${dog.age}`
-									) : (
-										<span className="bg-green-100 py-[1px] px-[4px] rounded border-1 border-green-900 text-green-900 rounded md uppercase text-[10px] mx-2">
-											puppy
-										</span>
-									)}
-								</span>
-								<div className="w-full flex items-center justify-between">
-									<span className="text-indigo-400 font-lg">{dog.breed}</span>
-									<span className="text-white font-lg">
-										{locationHashMap[dog.zip_code]}
-									</span>
+					{loadingDogs
+						? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(() => (
+								<div className="h-[220px] w-[320px] flex">
+									<div className="h-full w-full bg-gray-200 rounded-md animate-pulsate"></div>
 								</div>
-							</div>
-						</div>
-					))}
+						  ))
+						: dogs.map((dog) => (
+								<div
+									onClick={() => {
+										likedIds.includes(dog.id)
+											? unlikeHandler(dog)
+											: likeHandler(dog);
+									}}
+									className="cursor-pointer h-[220px] w-[320px] relative bg-linear-[180deg,transparent_50%,black_99%] flex flex-col gap-4 border-2 border-gray-200 rounded-md"
+								>
+									<div
+										key={dog.id}
+										style={{
+											backgroundImage: `url(${dog.img})`,
+											backgroundSize: "cover",
+											backgroundRepeat: "no-repeat",
+											backgroundPosition: "center",
+										}}
+										className="absolute -z-10 inset-0"
+									></div>
+									<div className="z-20">
+										{likedIds.includes(dog.id) ? (
+											<HeartIcon
+												fill="pink"
+												className="m-2 cursor-pointer rounded-md p-1"
+												onClick={() => {
+													unlikeHandler(dog);
+												}}
+												color="pink"
+												size={28}
+											/>
+										) : (
+											<HeartIcon
+												className="m-2 cursor-pointer rounded-md p-1"
+												onClick={() => {
+													likeHandler(dog);
+												}}
+												color="pink"
+												size={28}
+											/>
+										)}
+									</div>
+									<div className="px-2 flex m-1 z-20 w-full relative flex-col h-full text-white justify-end text-left gap-1">
+										<span className="font-semibold text-3xl flex items-center">
+											{dog.name}
+											{dog.age > 0 ? (
+												`, ${dog.age}`
+											) : (
+												<span className="bg-green-100 py-[1px] px-[4px] rounded border-1 border-green-900 text-green-900 rounded md uppercase text-[10px] mx-2">
+													puppy
+												</span>
+											)}
+										</span>
+										<div className="w-full flex items-center justify-between">
+											<span className="text-indigo-400 font-lg">
+												{dog.breed}
+											</span>
+											<span className="text-white font-lg">
+												{locationHashMap[dog.zip_code]}
+											</span>
+										</div>
+									</div>
+								</div>
+						  ))}
 				</div>
 
 				{/* Prev/Next */}
-				<div className="w-full flex flex-row justify-center items-center gap-10">
+				<div className="w-full flex flex-row  justify-center p-4 items-center gap-10">
 					<button
+						className="cursor-pointer border rounded-md px-4 py-2 m-5 border-indigo-700 hover:bg-indigo-700 hover:text-white text-indigo-700 transition-all"
 						disabled={index <= 0}
 						onClick={() => {
-							setIndex(index - 25);
+							setIndex(index - 12);
 						}}
 					>
-						Prev
+						Previous
 					</button>
 					<button
+						className="cursor-pointer border rounded-md px-4 py-2 m-5 border-indigo-700 hover:bg-indigo-700 hover:text-white text-indigo-700 transition-all"
 						onClick={() => {
-							setIndex(index + 25);
+							setIndex(index + 12);
 						}}
 					>
 						Next
@@ -459,45 +479,62 @@ function App() {
 				{/* Modal */}
 				{match !== null && (
 					<div
-						className={`${showModal} z-40 top-0 right-0 bottom-0 left-0 flex justify-center items-center h-screen w-screen absolute z-10 bg-black/30`}
+						className={`${showModal} z-40 top-0 right-0 bottom-0 left-0 flex justify-center items-center h-screen w-screen fixed z-10 bg-black/30`}
 					>
 						<div className="h-[650px] w-[500px] rounded bg-white">
-							<div className="w-full flex justify-end p-1">
-								<button type="button" onClick={() => setShowModal("hidden")}>
-									<XCircleIcon size={22} color="black" />
-								</button>
-							</div>
-
-							<div className="w-full justify-center flex-col items-center flex">
-								<p className="text-3xl font-bold leading-loose text-indigo-800">
-									Congratulations!
-								</p>
-								<p className="text-gray-600 text-lg">Your new pup is:</p>
-							</div>
-
-							<div className="flex my-6 flex-1 flex-col gap-4 text-center items-center justify-center">
-								<img
-									className="w-[300px] h-[300px] rounded-full"
-									src={match.img}
-								/>
-								<div className="space-y-2">
-									<p className="text-3xl font-bold text-indigo-800">
-										{match.name}
-									</p>
-									<p className="text-2xl font-bold text-gray-800">
-										{match.breed}
-									</p>
-									<p className="leading-loose text-gray-500">
-										{match.age > 1
-											? `${match.age} years old`
-											: "less than 1 year old"}
-									</p>
-									<div className="flex flex-row items-center gap-4 text-gray-500">
-										<MapPin size={18} color="blue" />
-										{locationHashMap[match.zip_code]}
-									</div>
+							{loadingMatch ? (
+								<div className="animate-pulse w-full h-full flex items-center p-8 flex-col space-y-6 size-8 block w-full rounded-md">
+									<div className="size-8 rounded-full w-3/4 bg-gray-200"></div>
+									<div className="size-6 rounded-full w-3/4 bg-gray-200"></div>
+									<div className="rounded-full w-[300px] h-[300px] bg-gray-200"></div>
+									<div className="size-6 rounded-full w-3/4 bg-gray-200"></div>
+									<div className="size-6 rounded-full w-3/4 bg-gray-200"></div>
+									<div className="size-6 rounded-full w-3/4 bg-gray-200"></div>
+									<div className="size-6 rounded-full w-3/4 bg-gray-200"></div>
 								</div>
-							</div>
+							) : (
+								<>
+									<div className="w-full flex justify-end p-1">
+										<button
+											type="button"
+											onClick={() => setShowModal("hidden")}
+										>
+											<X size={22} color="gray" />
+										</button>
+									</div>
+
+									<div className="w-full justify-center flex-col items-center flex">
+										<p className="text-3xl font-bold leading-loose text-indigo-800">
+											Congratulations!
+										</p>
+										<p className="text-gray-600 text-lg">Your new pup is:</p>
+									</div>
+
+									<div className="flex my-6 flex-1 flex-col gap-4 text-center items-center justify-center">
+										<img
+											className="w-[300px] h-[300px] rounded-full"
+											src={match.img}
+										/>
+										<div className="space-y-2">
+											<p className="text-3xl font-bold text-indigo-800">
+												{match.name}
+											</p>
+											<p className="text-2xl font-bold text-gray-800">
+												{match.breed}
+											</p>
+											<p className="leading-loose text-gray-500">
+												{match.age > 1
+													? `${match.age} years old`
+													: "less than 1 year old"}
+											</p>
+											<div className="flex flex-row items-center gap-4 text-gray-500">
+												<MapPin size={18} color="blue" />
+												{locationHashMap[match.zip_code]}
+											</div>
+										</div>
+									</div>
+								</>
+							)}
 						</div>
 					</div>
 				)}
