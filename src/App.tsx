@@ -43,6 +43,8 @@ function App() {
 	}>({});
 	const [loadingMatch, setLoadingMatch] = useState<boolean>(false);
 	const [loadingDogs, setLoadingDogs] = useState<boolean>(false);
+	const baseUrl = import.meta.env.VITE_BASE_URL;
+
 	const ages = [
 		"0",
 		"1",
@@ -65,7 +67,7 @@ function App() {
 	const auth = async (formData: FormData) => {
 		const body = { name: formData.get("name"), email: formData.get("email") };
 
-		await fetch("https://frontend-take-home-service.fetch.com/auth/login", {
+		await fetch(`${baseUrl}/auth/login`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -83,9 +85,7 @@ function App() {
 
 	// Get Ids with varying URL params based on filters
 	const getIds = async (breed: string, ageMin: string, ageMax: string) => {
-		let url = new URL(
-			"https://frontend-take-home-service.fetch.com/dogs/search?"
-		);
+		let url = new URL(`${baseUrl}/dogs/search?`);
 		breed && url.searchParams.append("breeds", breed);
 		url.searchParams.append("from", String(index));
 		url.searchParams.append("size", "12");
@@ -111,7 +111,7 @@ function App() {
 
 	const getDogs = async (ids: []) => {
 		setLoadingDogs(true);
-		await fetch("https://frontend-take-home-service.fetch.com/dogs", {
+		await fetch(`${baseUrl}/dogs`, {
 			method: "POST",
 			credentials: "include",
 			body: JSON.stringify(ids),
@@ -131,7 +131,7 @@ function App() {
 	};
 
 	const getBreeds = async () => {
-		await fetch("https://frontend-take-home-service.fetch.com/dogs/breeds", {
+		await fetch(`${baseUrl}/dogs/breeds`, {
 			method: "GET",
 			credentials: "include",
 			headers: {
@@ -148,7 +148,7 @@ function App() {
 	const getMatch = async () => {
 		setShowModal("flex");
 		setLoadingMatch(true);
-		await fetch("https://frontend-take-home-service.fetch.com/dogs/match", {
+		await fetch(`${baseUrl}/dogs/match`, {
 			method: "POST",
 			credentials: "include",
 			body: JSON.stringify(liked),
@@ -168,7 +168,7 @@ function App() {
 
 	const appendCities = async () => {
 		let zipCodes = dogs.map((dog) => dog.zip_code);
-		await fetch("https://frontend-take-home-service.fetch.com/locations", {
+		await fetch(`${baseUrl}/locations`, {
 			method: "POST",
 			credentials: "include",
 			body: JSON.stringify(zipCodes),
