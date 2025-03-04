@@ -1,17 +1,8 @@
 import { useState, useEffect } from "react";
+import { HeartIcon, MapPin, X } from "lucide-react";
+
 import "./App.css";
 import "./index.css";
-import {
-	HeartIcon,
-	HeartPulse,
-	LocateIcon,
-	MapPin,
-	PinIcon,
-	ThumbsUp,
-	X,
-	XCircleIcon,
-	XIcon,
-} from "lucide-react";
 
 interface Dog {
 	id: string;
@@ -21,10 +12,6 @@ interface Dog {
 	zip_code: string;
 	breed: string;
 	city?: string;
-}
-
-interface Match {
-	match: string;
 }
 
 interface Location {
@@ -46,7 +33,6 @@ function App() {
 	const [order, setOrder] = useState<string>("breed:asc");
 	const [ageMin, setAgeMin] = useState<string>("");
 	const [ageMax, setAgeMax] = useState<string>("");
-	const [zipCodes, setZipCodes] = useState<string>("");
 	const [liked, setLiked] = useState<Dog[]>([]);
 	const [match, setMatch] = useState<Dog | null>(null);
 	const [likedIds, setLikedIds] = useState<string[]>([]);
@@ -75,6 +61,7 @@ function App() {
 		"14",
 	];
 
+	// Login function
 	const auth = async (formData: FormData) => {
 		const body = { name: formData.get("name"), email: formData.get("email") };
 
@@ -94,12 +81,8 @@ function App() {
 		});
 	};
 
-	const getIds = async (
-		breed: string,
-		ageMin: string,
-		ageMax: string,
-		zipCodes: string
-	) => {
+	// Get Ids with varying URL params based on filters
+	const getIds = async (breed: string, ageMin: string, ageMax: string) => {
 		let url = new URL(
 			"https://frontend-take-home-service.fetch.com/dogs/search?"
 		);
@@ -108,7 +91,6 @@ function App() {
 		url.searchParams.append("size", "12");
 		ageMin && url.searchParams.append("ageMin", ageMin);
 		ageMax && url.searchParams.append("ageMax", ageMax);
-		zipCodes && url.searchParams.append("zipCodes", zipCodes);
 		url.searchParams.append("sort", order);
 
 		await fetch(url, {
@@ -202,6 +184,7 @@ function App() {
 		});
 	};
 
+	// Create a hashmap of zipCodes to city/state strings for dog cards
 	useEffect(() => {
 		if (!locationData.length) return;
 		let table: { [key: string]: string } = {};
@@ -215,8 +198,8 @@ function App() {
 	}, [locationData]);
 
 	useEffect(() => {
-		getIds(breed, ageMin, ageMax, zipCodes);
-	}, [loggedIn, index, breed, ageMin, ageMax, zipCodes, order]);
+		getIds(breed, ageMin, ageMax);
+	}, [loggedIn, index, breed, ageMin, ageMax, order]);
 
 	useEffect(() => {
 		getBreeds();
@@ -256,9 +239,12 @@ function App() {
 		setOrder(e.target.value);
 	};
 
+	// Scroll back to top when search results change
 	useEffect(() => {
 		window.scrollTo(0, 0);
 	}, [index]);
+
+	// Return auth screen if not logged in
 	if (!loggedIn) {
 		return (
 			<>
@@ -382,7 +368,7 @@ function App() {
 					</button>
 				</div>
 
-				{/* Results */}
+				{/* Search Results */}
 				<div className="grid p-4 grid-cols-4 mb-10 justify-start gap-4">
 					{loadingDogs
 						? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(() => (
@@ -455,7 +441,7 @@ function App() {
 						  ))}
 				</div>
 
-				{/* Prev/Next */}
+				{/* Navigation */}
 				<div className="w-full flex flex-row  justify-center p-4 items-center gap-10">
 					<button
 						className="cursor-pointer border rounded-md px-4 py-2 m-5 border-indigo-700 hover:bg-indigo-700 hover:text-white text-indigo-700 transition-all"
@@ -527,7 +513,7 @@ function App() {
 													? `${match.age} years old`
 													: "less than 1 year old"}
 											</p>
-											<div className="flex flex-row items-center gap-4 text-gray-500">
+											<div className="flex flex-row items-center justify-center gap-4 text-gray-500">
 												<MapPin size={18} color="blue" />
 												{locationHashMap[match.zip_code]}
 											</div>
