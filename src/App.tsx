@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import "./App.css";
 import "./index.css";
 import {
+	HeartIcon,
+	HeartPulse,
 	LocateIcon,
 	MapPin,
 	PinIcon,
@@ -348,14 +350,14 @@ function App() {
 				</div>
 
 				{/* Match Bar */}
-				<div className="h-[50px] flex flex-row justify-between">
+				<div className="h-[50px] z-30 bg-white sticky top-0 flex flex-row justify-between">
 					<div className="flex items-center p-2 flex-row">
 						{liked.map((dog) => (
 							<img
 								onClick={() => {
 									unlikeHandler(dog);
 								}}
-								className="border-1 border-transparent hover:border-red-500 cursor-pointer h-6 w-6 rounded-full"
+								className="border-1 border-green-400 hover:border-red-500 cursor-pointer h-8 w-8 rounded-full"
 								src={dog.img}
 							/>
 						))}
@@ -374,32 +376,39 @@ function App() {
 				<div className="grid p-4 grid-cols-4 mb-10 justify-start gap-4">
 					{dogs.map((dog) => (
 						<div
+							onClick={() => {
+								likedIds.includes(dog.id)
+									? unlikeHandler(dog)
+									: likeHandler(dog);
+							}}
 							key={dog.id}
 							style={{
 								backgroundImage: `url(${dog.img})`,
 								backgroundSize: "cover",
+								backgroundRepeat: "no-repeat",
 								backgroundPosition: "center",
 							}}
-							className="w-[300px] justify-start items-start h-[400px] flex flex-col gap-4 border-2 border-gray-200 rounded-md"
+							className="cursor-pointer overflow-hidden w-[300px] justify-start items-start h-[400px] flex flex-col gap-4 border-2 border-gray-200 rounded-md"
 						>
 							<div className="z-20">
 								{likedIds.includes(dog.id) ? (
-									<ThumbsUp
-										className="m-2 bg-blue-500 cursor-pointer rounded-md p-1"
+									<HeartIcon
+										fill="pink"
+										className="m-2 cursor-pointer rounded-md p-1"
 										onClick={() => {
 											unlikeHandler(dog);
 										}}
-										color="white"
-										size={24}
+										color="pink"
+										size={28}
 									/>
 								) : (
-									<ThumbsUp
-										className="m-2 bg-transparent cursor-pointer rounded-md p-1"
+									<HeartIcon
+										className="m-2 cursor-pointer rounded-md p-1"
 										onClick={() => {
 											likeHandler(dog);
 										}}
-										color="blue"
-										size={24}
+										color="pink"
+										size={28}
 									/>
 								)}
 							</div>
@@ -416,8 +425,8 @@ function App() {
 									)}
 								</span>
 								<div className="w-full flex items-center justify-between">
-									<span className="text-indigo-300">{dog.breed}</span>
-									<span className="text-white">
+									<span className="text-indigo-400 font-lg">{dog.breed}</span>
+									<span className="text-white font-lg">
 										{locationHashMap[dog.zip_code]}
 									</span>
 								</div>
