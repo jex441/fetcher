@@ -97,7 +97,7 @@ function App() {
 		);
 		breed && url.searchParams.append("breeds", breed);
 		url.searchParams.append("from", String(index));
-		url.searchParams.append("size", "9");
+		url.searchParams.append("size", "12");
 		ageMin && url.searchParams.append("ageMin", ageMin);
 		ageMax && url.searchParams.append("ageMax", ageMax);
 		zipCodes && url.searchParams.append("zipCodes", zipCodes);
@@ -371,20 +371,41 @@ function App() {
 				</div>
 
 				{/* Results */}
-				<div className="grid p-4 grid-cols-3 my-10 h-[500px] justify-start flex-wrap gap-4">
+				<div className="grid p-4 grid-cols-4 mb-10 justify-start gap-4">
 					{dogs.map((dog) => (
 						<div
 							key={dog.id}
-							className="w-full justify-start items-start h-[150px] flex flex-row gap-4 border-2 border-gray-200 rounded-md"
+							style={{
+								backgroundImage: `url(${dog.img})`,
+								backgroundSize: "cover",
+								backgroundPosition: "center",
+							}}
+							className="w-[300px] justify-start items-start h-[400px] flex flex-col gap-4 border-2 border-gray-200 rounded-md"
 						>
-							<div className="w-[200px] flex justify-center relative object-cover h-full">
-								<img
-									src={dog.img}
-									className="h-full w-full object-cover rounded-md"
-								/>
+							<div className="z-20">
+								{likedIds.includes(dog.id) ? (
+									<ThumbsUp
+										className="m-2 bg-blue-500 cursor-pointer rounded-md p-1"
+										onClick={() => {
+											unlikeHandler(dog);
+										}}
+										color="white"
+										size={24}
+									/>
+								) : (
+									<ThumbsUp
+										className="m-2 bg-transparent cursor-pointer rounded-md p-1"
+										onClick={() => {
+											likeHandler(dog);
+										}}
+										color="blue"
+										size={24}
+									/>
+								)}
 							</div>
-							<div className="flex m-1 flex-col text-left gap-2">
-								<span className="font-semibold text-xl flex items-center">
+							<div className="h-[400px] w-[300px] z-10 absolute bg-linear-[180deg,transparent_50%,black_99%]"></div>
+							<div className="px-2 flex m-1 z-20 w-full relative flex-col h-full text-white justify-end text-left gap-1">
+								<span className="font-semibold text-3xl flex items-center">
 									{dog.name}
 									{dog.age > 0 ? (
 										`, ${dog.age}`
@@ -394,30 +415,12 @@ function App() {
 										</span>
 									)}
 								</span>
-								<span className="text-gray-600">{dog.breed}</span>
-								<span className="text-gray-600">
-									{locationHashMap[dog.zip_code]}
-								</span>
-
-								{likedIds.includes(dog.id) ? (
-									<ThumbsUp
-										className="bg-blue-500 cursor-pointer rounded-md p-1"
-										onClick={() => {
-											unlikeHandler(dog);
-										}}
-										color="white"
-										size={24}
-									/>
-								) : (
-									<ThumbsUp
-										className="bg-transparent cursor-pointer rounded-md p-1"
-										onClick={() => {
-											likeHandler(dog);
-										}}
-										color="blue"
-										size={24}
-									/>
-								)}
+								<div className="w-full flex items-center justify-between">
+									<span className="text-indigo-300">{dog.breed}</span>
+									<span className="text-white">
+										{locationHashMap[dog.zip_code]}
+									</span>
+								</div>
 							</div>
 						</div>
 					))}
@@ -445,7 +448,7 @@ function App() {
 				{/* Modal */}
 				{match !== null && (
 					<div
-						className={`${showModal} top-0 right-0 bottom-0 left-0 flex justify-center items-center h-screen w-screen absolute z-10 bg-black/30`}
+						className={`${showModal} z-40 top-0 right-0 bottom-0 left-0 flex justify-center items-center h-screen w-screen absolute z-10 bg-black/30`}
 					>
 						<div className="h-[700px] w-[500px] rounded bg-white">
 							<div className="w-full flex justify-end p-2">
