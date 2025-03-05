@@ -500,9 +500,9 @@ function App() {
 										<p className="text-gray-600 text-lg">Your new pup is:</p>
 									</div>
 
-									<div className="flex my-6 flex-1 flex-col gap-4 text-center items-center justify-center">
+									<div className="flex my-6 flex-1 flex-col gap-4 relative text-center items-center justify-center">
 										<img
-											className="w-[300px] h-[300px] rounded-full"
+											className="w-[300px] h-[300px] object-cover rounded-full"
 											src={match.img}
 										/>
 										<div className="space-y-2">
